@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="C:\Users\minhh\Desktop\Chem Calc Project\">
+    <title>My Chatbot</title>
+    <style>
+
+        /* Dark mode styles */
+        
+        body {
+            background-color: #ffffff;
+            color: #002436;
+            font-family: 'Chivo';
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: left;
+            align-items: left;
+            height: 100vh;
+        }
+        .mole-wrapper {
+            width: fit-content;
+            height: fit-content;
+        }
+
+        /* Add CSS styles for message bubbles */
+        #chatArea {
+            margin-bottom: auto; /* Move the chat area to the bottom */
+            padding-bottom: 20px; /* Add some padding at the bottom */
+        }
+        /* Wrapper for the chat messages with scrolling */
+        .message-wrapper {
+            width: auto;
+            height: 650px; /* Set a fixed height for the message wrapper */
+            overflow-y: auto; /* Enable vertical scrolling for overflow content */
+        }
+
+        .message {
+            background-color: #f1f0f0;
+            border-radius: 15px;
+            padding: 10px;
+            margin-bottom: 10px;
+            max-width: 70%;
+            position: relative; /* Add position relative to hold the name tags and circles */
+        }
+
+        .user-message {
+            align-self: flex-end;
+            background-color: #007bff;
+            color: #fff;
+        }
+
+        /* AI's response in black text */
+        .ai-message {
+            color: #000;
+        }
+
+        /* Name tags for AI and User */
+        .name-tag {
+            position: absolute;
+            top: 30%; /* Adjust the distance above the message bubble */
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .ai-name-tag {
+            color: #000000;
+            right: 4px; /* Position on the right side */
+        }
+        pre {
+        margin: 0;
+        overflow-x: auto;
+        }
+        code {
+        white-space: pre-wrap;
+        display: block;
+        max-height: 200px; /* Limit the height of code blocks */
+        overflow-y: auto; /* Enable scrollability within code blocks */
+        }
+
+        .user-name-tag {
+            color: #000000;
+            right: 4px; /* Position on the right side */
+        }
+
+        /* Circles for AI and User */
+        .circle {   
+            position: absolute;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            top: 50%; /* Position at the vertical center of the message bubble */
+            transform: translateY(-50%);
+        }
+
+        .user-circle {
+            background-color: #fff;
+            right: -47px; /* Position on the right side of the message bubble */
+        }
+
+        .ai-circle {
+            background-color: #01412a;
+            right: -47px; 
+        }
+        .container {
+        display: flex;
+    }
+
+        .column {
+        flex: 1; /* Each column takes up an equal amount of space */
+        padding: 10px;
+        border: 1px solid #000000;
+        }
+
+        /* Style the input box */
+        #userInput {
+        padding: 10px;
+        font-size: 16px;
+        border: none;
+        border-radius: 5px;
+        margin-top: auto; /* Move the input box to the bottom */
+        background-color: #f1f0f0;
+        color: #000;
+        min-width: 200px; /* Set minimum width for the input box */
+        width: auto; /* Make the input box occupy one-third of the available width */
+        box-sizing: border-box; /* Include padding and border in the width calculation */
+
+        
+    }
+    </style>
+</head>
+<body>
+
+    <div class = "container">
+        <div class = "column">
+            <h1>Chem Calc Pre-Pre-Pre Alpha</h1>
+            <div class="message-wrapper">
+                <div id="chatArea">
+                    <!-- The chat messages will be placed inside this wrapper -->
+                </div>
+            </div>
+            <input type="text" id="userInput" placeholder="Type a message...">
+        </div>
+        <div class = "column">
+            <h1>Mole Calculator</h1>
+            <div class = "mole-wrapper">
+                <input type="text" id ="elementinput" placeholder= "Elemental Symbol">
+            </div>       
+        </div>
+
+            
+    </div>
+   
+
+</body>
+</html>
+
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $('#elementInput').on('keypress', function () {
+            var symbol = $(this).val();
+            setTimeout(function (){
+                $.post("/moles", { symbol : symbol}, function (data){
+                    var dummy = $('<div class="message">').addClass('ai-message').appendTo('#chatArea');
+                    })
+                })
+            })
+        })
+        var aiResponding = false; // Flag to indicate if AI is responding
+        $('#userInput').on('keypress', function (e) {
+            if (e.which == 13 && !aiResponding) { //Detect enter key and check if AI is not responding
+                e.preventDefault(); //Prevent form submission
+                var message = $(this).val();
+                // Show the typing indicator
+                $('<div class="message ai-message">').text('AI is typing...').appendTo('#chatArea');
+                $(this).val(''); //Clear input field
+
+                // Disable the input box while AI is responding
+                $(this).prop('disabled', true);
+
+                aiResponding = true; // Set the flag to indicate AI is responding
+                setTimeout(function () {
+                    $.post("/ask", { message: message }, function (data) {
+                        // Remove the typing indicator
+                        $('.message.ai-message:last-child').remove();
+
+                        // Add user's message bubble to the chat area
+                        var userMessageDiv = $('<div class="message">').addClass('user-message').text(message).appendTo('#chatArea');
+
+                        // Add circle to the user message bubble
+                        var userCircle = $('<div class="circle">').addClass('user-circle').appendTo(userMessageDiv);
+
+                        // Add name tag to the user circle
+                        var userNameTag = $('<div class="name-tag">').addClass('user-name-tag').text('User').appendTo(userCircle);
+
+                        // Process the AI's response
+                        var aiMessageDiv = $('<div class="message">').addClass('ai-message').appendTo('#chatArea');
+                        var aiCircle = $('<div class="circle">').addClass('ai-circle').appendTo(aiMessageDiv);
+                        var aiNameTag = $('<div class="name-tag">').addClass('ai-name-tag').text('AI').appendTo(aiCircle);
+
+                        // Regular expression to match the code block inside backticks (```)
+                        var codeBlockRegex = /```([^`]+)```/g;
+                        var chemicalEquationRegex = /^([A-Za-z0-9]+ ?(?:\+\s?[A-Za-z0-9]+ ?)*)\s*->\s*([A-Za-z0-9]+ ?(?:\+\s?[A-Za-z0-9]+ ?)*)$/g;
+                        var chemicalFormulaRegex = /^[A-Z][a-z]?\d*([A-Z][a-z]?\d*)*$/g;
+
+
+
+
+                        var aiMessageText = data.trim(); // AI's response text
+                        var codeBlockMatches = aiMessageText.match(codeBlockRegex); // Array of code blocks
+                        var chemEqMatches = aiMessageText.match(chemicalEquationRegex); // Chem notation matching
+                        var chemFormulaMatches = aiMessageText.match(chemicalFormulaRegex);
+
+                        // If code blocks are found, replace them with <pre><code> elements
+                        if (codeBlockMatches) {
+                            codeBlockMatches.forEach(function (match) {
+                                var code = match.substring(3, match.length - 3); // Remove the backticks from the code block
+                                var codeBlockElement = $('<pre><code>').text(code); // Create <pre><code> element with the code
+                                aiMessageText = aiMessageText.replace(match, codeBlockElement[0].outerHTML); // Replace the match with the code block element
+                            });
+                        }
+                        if (chemEqMatches) {
+                            chemEqMatches.forEach(function (match) {
+                                var chemEqElement = $('<pre><code>').text(chemEqElement); // Create <pre><code> element with the code
+                                aiMessageText = aiMessageText.replace(match, chemEqElement[0].outerHTML); // Replace the match with the code block element
+                            });
+                        }
+                        
+                        if (chemFormulaMatches) { //conditional approach to finding chem formulae
+                            chemFormulaMatches.forEach(function (match) {
+                                var chemFormulaElement = $('<pre><code>').text(formula); // Create <pre><code> element with the code
+                                aiMessageText = aiMessageText.replace(match, chemFormulaElement[0].outerHTML); // Replace the match with the code block element
+                            });
+                        }
+                        
+
+
+                        // Display the AI's response with replaced code blocks
+                        //aiMessageDiv.html(aiMessageText); oldcode : 207
+                        // Display the AI's response with replaced code blocks and line breaks newcode 209 \/ replace 207
+                        //aiMessageDiv.html(aiMessageText.replace(/\n/g, '<br>')); 209
+                        // Display the AI's response with replaced code blocks, line breaks, and bold text
+                        //aiMessageDiv.html(aiMessageText.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')); //replacing 209 replaced by 213 
+                        // Display the AI's response with replaced code blocks, line breaks, bold text, and subscript text
+                        aiMessageDiv.html(aiMessageText.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/_(.*?)_/g, '<sub>$1</sub>')); //replacing 211
+
+
+
+                        // Add circle and name tag to the AI message bubble
+                        aiCircle.appendTo(aiMessageDiv);
+                        aiNameTag.appendTo(aiCircle);
+
+                        // Re-enable the input box after AI's response is posted
+                        $('#userInput').prop('disabled', false);
+
+                        aiResponding = false; // Reset the flag to indicate AI is done responding
+                    });
+                }, 2000); // Simulate AI response delay with a timeout
+            }
+        });
+    ;
+</script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+    
+</script>
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+

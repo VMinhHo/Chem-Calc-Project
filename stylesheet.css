@@ -1,0 +1,10 @@
+@font-face {
+    font-family: 'Chivo';
+    src: url('Chivo-Medium.woff2') format('woff2'),
+        url('Chivo-Medium.woff') format('woff');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+
