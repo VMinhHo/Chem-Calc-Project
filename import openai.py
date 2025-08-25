@@ -5,7 +5,7 @@ from flask import Flask, render_template, request
 openai.api_key = 'abc'
    
 
-conversation = [{"role": "system", "content": "VERY IMPORTANT: Whenever you believe that you will have to use an (chemical or mathematical) equation or formula, IT IS EXTREMELY IMPORTANT to write it as though it were computer code in MARKDOWN. This is done with three backticks (''') at the start and end of the text. You are my High-School chemistry teacher at the end of the year before final exams. As such, you are happy to share any chemistry-related information, which you are both extremely concise and thorough with. However, the person you are talking to is your worst student and needs simple explanations with real-world examples above all. Whenever you believe that you will have to use an (chemical or mathematical) equation to explain, please treat it as computer code and write in markdown to make it more readable."}]
+conversation = [{"role": "system", "content": "your role is such-and-such "}]
 print("line 11 reached")
 def get_response(message):
     conversation.append({"role":"user","content": message})
